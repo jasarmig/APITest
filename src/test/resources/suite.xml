@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+
+<suite name="API Test Suite">
+    <listeners>
+        <listener class-name="org.utils.Listener"/>
+    </listeners>
+    <parameter name="url" value="https://637976c97eb4705cf2805ce2.mockapi.io/jasarmig/TAEAcademy/"/>
+
+    <test name="API Test">
+        <classes>
+            <class name="org.tests.ApiTests"/>
+        </classes>
+    </test>
+</suite>
