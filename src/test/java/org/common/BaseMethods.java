@@ -34,22 +34,23 @@ public class BaseMethods {
     /**
      * Method to create 10 different transactions without repeated emails.
      *
-     * @return ArrayLIst\<Transaction\>
+     * @return ArrayLIst<Transaction>
      */
-    public ArrayList<Transaction> initializePojo() {
+    public ArrayList<Transaction> initializePojo(ArrayList<Transaction> transactions) {
         int i = 0;
-        transactions = new ArrayList<>();
+        ArrayList<Transaction> newTransactions = new ArrayList<>();
         while(i < 10) {
             Transaction newTransaction = fakerFill(new Transaction());
-            if(i == 0) {
-                transactions.add(newTransaction);
+            if(newTransactions.size() == 0 && !emailExists(newTransaction.getEmail(),transactions)) {
+                newTransactions.add(newTransaction);
             }
-            else if(!emailExists(newTransaction.getEmail(), transactions)) {
-                transactions.add(newTransaction);
+            else if(!emailExists(newTransaction.getEmail(), transactions) &&
+                    !emailExists(newTransaction.getEmail(), newTransactions)) {
+                newTransactions.add(newTransaction);
             }
             i++;
         }
-        return transactions;
+        return newTransactions;
     }
 
     /**
@@ -86,18 +87,6 @@ public class BaseMethods {
         List<Transaction> foundIn = transactionStream.filter(t -> t.getEmail().equals(email))
                 .collect(Collectors.toList());
         return (foundIn.size() > 0);
-    }
-
-    /**
-     * Method that retreives a random email from an ArrayList of Transaction type objects
-     *
-     * @param transactions
-     * @return String
-     */
-    public String getEmailFromList(ArrayList<Transaction> transactions) {
-        Faker faker = new Faker();
-        int idx = faker.random().nextInt(0,9);
-        return transactions.get(idx).getEmail();
     }
 
     /**
@@ -229,4 +218,5 @@ public class BaseMethods {
         checkThat("status code is 200", response.getStatusCode(), is(200));
         return response;
     }
+
 }

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.Is.is;
 
 public class ApiTests extends BaseMethods {
@@ -39,33 +40,24 @@ public class ApiTests extends BaseMethods {
     }
     /**
      * Test method that adds 10 transactions to the endpoint verifying there are no duplicate emails.
-     * The method attempts to add an 11th transaction with a duplicate email
      *
      * @param url
      */
     @Test
     @Parameters({"url"})
     public void initializeEndpointData(String url) {
-        Reporter.info("Initializing 10 transactions with random data");
-        ArrayList<Transaction> transactions = initializePojo();
-        Reporter.info("Creating new transaction");
-        Transaction newTransaction = fakerFill(new Transaction());
-        Reporter.info("Assigning duplicate email to new transaction");
-        String duplicateEmail = getEmailFromList(transactions);
-        newTransaction.setEmail(duplicateEmail);
-        Reporter.info("Attempting to add transaction with duplicate email to list");
-        if(emailExists(newTransaction.getEmail(),transactions)) {
-            Reporter.info("Can't add entry to Transactions, duplicated email");
-        }
-        else {
-            transactions.add(newTransaction);
-            Reporter.info("Entry added to Transactions");
-        }
+        Reporter.info("Getting transactions from endpoint");
+        Response response = getRequest(url);
+        int initialTransactions = elementsInEndpoint(response);
+        Reporter.info("Initial transaction count is: " + initialTransactions);
+        JsonPath path = new JsonPath(response.asString());
+        Reporter.info("Initializing 10 new transactions with random data");
+        ArrayList<Transaction> transactions = initializePojo(jsonToObject(path));
         Stream<Transaction> transactionStream = transactions.stream();
-        int initialTransactions = elementsInEndpoint(getRequest(url));
+        Reporter.info("Posting new transactions to endpoint");
         transactionStream.forEach(t -> postRequest(url,t.toString()));
-        JsonPath path = new JsonPath(getRequest(url).asString());
-        checkThat("endpoint has 10 more elements",path.getInt("transactions.size()"),is(10));
+        path = new JsonPath(getRequest(url).asString());
+        checkThat("endpoint has 10 more elements",path.getInt("transactions.size()"),is(10 + initialTransactions));
     }
 
     /**
@@ -122,7 +114,7 @@ public class ApiTests extends BaseMethods {
     }
 
     /**
-     * Simple annotation to log the end of a test.
+     * Simple annotation to log the end of a test leaving an empty line for readability.
      */
     @AfterMethod
     public void reportTestEnd() {
