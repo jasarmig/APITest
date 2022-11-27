@@ -40,7 +40,7 @@ that come from the endpoint to the testing app. This modification simply adds an
 come from the API, this is important beacuse this will help build a proper path.</p>
 
 <figure align="center">
-<img alt="Schema" src="./img/get.png" width=80%>
+<img alt="GET endpoint" src="./img/get.png" width=80%>
 <figcaption>Modified GET endpoint</figcaption>
 </figure>
 
